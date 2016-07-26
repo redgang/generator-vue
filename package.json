@@ -1,12 +1,11 @@
 {
-  "name": "generator-vue-app",
-  "version": "0.1.5",
-  "description": "the scaffold of the vue app",
+  "name": "generator-redx-vue",
+  "version": "0.0.1",
+  "description": "generator vue",
   "homepage": "",
   "author": {
-    "name": "gongzhen",
-    "email": "gongzhen1027@hotmail.com",
-    "url": ""
+    "name": "redgang",
+    "email": "redx123@126.com"
   },
   "files": [
     "generators"
@@ -49,7 +48,7 @@
       "mocha": true
     }
   },
-  "repository": "gzgogo/generator-vue-app",
+  "repository": "redgang/generator-vue",
   "scripts": {
     "prepublish": "gulp prepublish",
     "test": "gulp"

@@ -4,7 +4,8 @@ var extend = require('deep-extend');
 var _ = require('lodash');
 
 module.exports = {
-  debug: debug
+  debug: debug,
+  capitalize: _.capitalize
 }
 
 function debug(generator, msg) {

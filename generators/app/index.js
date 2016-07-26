@@ -8,12 +8,20 @@ var utils = require('../utils.js');
 
 module.exports = generators.Base.extend({
 
+  init: function () {
+    this.on('end', function () {
+      if (!this.options['skip-install']) {
+        this.installDependencies();
+      }
+    });
+  },
+
   initializing: function () {
     var folderName = path.basename(this.destinationRoot());
-    this.projectName = folderName || "my-project";
+    this.projectName = folderName || "suneee-app";
     this.version = "0.0.1";
-    this.description = "";
-    this.cssPreProcessor = "none";
+    this.description = "suneee app项目";
+    this.cssPreProcessor = "css";
 
     utils.debug(this, "app:initializing");
   },
@@ -23,7 +31,7 @@ module.exports = generators.Base.extend({
 
     // Have Yeoman greet the user.
     this.log(yosay(
-      'Welcome to the amazing ' + chalk.red('generator-vue-app') + ' generator!'
+      'Welcome to the amazing ' + chalk.red('generator-vue') + ' generator!'
     ));
 
     var done = this.async();
@@ -52,7 +60,8 @@ module.exports = generators.Base.extend({
         name: 'cssPreProcessor',
         message: 'Which CSS pre-processor do you need?',
         choices: [
-          { name: 'none', value: 'none' },
+          { name: 'css', value: 'css' },
+          { name: 'postcss', value: 'postcss' },
           { name: 'less', value: 'less' },
           { name: 'sass', value: 'sass' },
           { name: 'stylus', value: 'stylus' }
@@ -83,119 +92,133 @@ module.exports = generators.Base.extend({
     });
   },
 
+
   writing: function () {
     utils.debug(this, "app:writing");
 
-    utils.debug(this, "app:templatePath " + this.templatePath('webpack.dev.config.js'));
-    utils.debug(this, "app:destinationPath " + this.destinationPath('webpack.dev.config.js'));
+    // utils.debug(this, "app:templatePath " + this.templatePath('webpack.dev.config.js'));
+    // utils.debug(this, "app:destinationPath " + this.destinationPath('webpack.dev.config.js'));
 
-    this.fs.copy(
-      this.templatePath('gitignore'),
-      this.destinationPath('.gitignore')
-    );
+    this.mkdir('src/routes');
+    this.mkdir('src/themes');
+    this.mkdir('src/plugins');
+    this.directory('src/components', 'src/components');
+    this.directory('src/store', 'src/store');
+    this.directory('src/utils', 'src/utils');
 
-    this.fs.copyTpl(
-      this.templatePath('webpack.dev.config.js'),
-      this.destinationPath('webpack.dev.config.js'),
-      {
-        projectName: this.projectName
-      }
-    );
+    //files
 
-    this.fs.copyTpl(
-      this.templatePath('webpack.prod.config.js'),
-      this.destinationPath('webpack.prod.config.js'),
-      {
-        projectName: this.projectName
-      }
-    );
+    this.copy('src/index.js', 'src/index.js');
+    this.copy('src/index.html', 'src/index.html');
+    this.copy('src/app.vue', 'src/app.vue');
+
+
+    this.template('_package.json', 'package.json');
+    this.template('_README.md', 'README.md');
 
     this._copyPackageJson();
   },
 
-  install: function () {
-    utils.debug(this, "app:install");
-    // this.npmInstall([ 'react','react-redux' ], { 'saveDev': true });
-    // this._addCssDependencies();
+  projectfiles: function () {
+    this.copy('editorconfig', '.editorconfig');
+    this.copy('gitignore', '.gitignore');
+    this.copy('eslintrc', '.eslintrc');
+    this.copy('babelrc', '.babelrc');
+    this.copy('eslintignore', '.eslintignore');
   },
 
-  // conflicts: function () {
-  //   // this.log("conflicts");
-  //   this._addCssDependencies();
-  // },
+  npm: function () {
+    this.npmInstall([
+      "chartist",
+      "is-plain-obj",
+      "nd-datetime",
+      "nd-promise",
+      "querystring",
+      "string-template",
+      "vue",
+      "vue-router",
+      "vuex",
+      "whatwg-fetch",
+      "wind-dom"
+    ], { save: true });
+  },
+
+  webpack: function () {
+    this.npmInstall([
+      "babel-cli",
+      "babel-core",
+      "babel-eslint",
+      "babel-loader",
+      "babel-plugin-add-module-exports",
+      "babel-plugin-transform-async-to-generator",
+      "babel-plugin-transform-runtime",
+      "babel-polyfill",
+      "babel-preset-es2015",
+      "babel-preset-stage-0",
+      "babel-runtime",
+      "better-npm-run",
+      "copy-webpack-plugin",
+      "css-loader",
+      "debug",
+      "eslint",
+      "eslint-friendly-formatter",
+      "eslint-loader",
+      "eslint-plugin-babel",
+      "eslint-plugin-html",
+      "eslint-plugin-vue",
+      "extract-text-webpack-plugin",
+      "file-loader",
+      "fs-extra",
+      "html-webpack-plugin",
+      "json-loader",
+      "karma",
+      "nodemon",
+      "phantomjs-polyfill",
+      "postcss-browser-reporter",
+      "postcss-cssnext",
+      "postcss-custom-properties",
+      "postcss-font-variant",
+      "postcss-functions",
+      "postcss-import",
+      "postcss-loader",
+      "postcss-mixins",
+      "postcss-reporter",
+      "postcss-url",
+      "progress-bar-webpack-plugin",
+      "rimraf",
+      "sinon",
+      "style-loader",
+      "url-loader",
+      "vue-hot-reload-api",
+      "vue-html-loader",
+      "vue-loader",
+      "vue-style-loader",
+      "webpack",
+      "webpack-dev-middleware",
+      "webpack-hot-middleware",
+      "yargs"
+    ], { saveDev: true });
+    this.copy('_webpack.config.js', 'webpack.config.js');
+  },
+
+  server: function () {
+    this.directory('server', 'server');
+    this.directory('bin', 'bin');
+    this.directory('build', 'build');
+    this.directory('config', 'config');
+
+    this.npmInstall([
+      "koa",
+      "koa-connect-history-api-fallback",
+      "koa-convert",
+      "koa-static",
+      "co-request",
+      "iconv-lite",
+      ], { saveDev: true });
+  },
 
   end: function () {
     utils.debug(this, "app:end");
-  },
-
-  _copyPackageJson: function () {
-    var srcPkgFile = this.templatePath('package.json');
-    var dstPkgFile = this.destinationPath('package.json');
-
-    var pkg = this.fs.readJSON(srcPkgFile);
-    pkg.name = this.projectName;
-    pkg.version = this.version;
-    pkg.description = this.description;
-
-    // utils.debug(this, pkg);
-    this._addCssDependencies(pkg);
-    // this._addES6Dependencies(pkg);
-
-    if (pkg) {
-      this.fs.writeJSON(dstPkgFile, pkg);
-    }
-  },
-
-  _addCssDependencies: function (pkg) {
-    utils.debug(this, "_addCssDependencies");
-
-    var cssDependencies = null;
-    switch (this.cssPreProcessor) {
-      case "less":
-        cssDependencies = {
-          "less": "^2.6.1",
-          "less-loader": "^2.2.2",
-        }
-        break;
-      case "sass":
-        cssDependencies = {
-          "node-sass": "^3.4.2",
-          "sass-loader": "^3.1.2",
-        }
-        break;
-      case "stylus":
-        cssDependencies = {
-          "stylus": "^0.54.5",
-          "stylus-loader": "^2.1.0"
-        }
-        break;
-      default:
-        break;
-    }
-
-    if (cssDependencies) {
-      var addedDependencies = {
-        devDependencies: cssDependencies
-      };
-      extend(pkg, addedDependencies);
-    }
-  },
-
-  _addES6Dependencies: function (pkg) {
-    utils.debug(this, "_addES6Dependencies");
-
-    if (this.needES6) {
-      var addedDependencies = {
-        devDependencies: {
-          "babel-core": "^6.7.6",
-          "babel-loader": "^6.2.4",
-          "babel-preset-es2015": "^6.6.0",
-          "babel-preset-react": "^6.5.0",
-          "babel-preset-react-hmre": "^1.1.1"
-        }
-      };
-      extend(pkg, addedDependencies);
-    }
   },
 
   _logFile: function (fileName) {
